@@ -1,0 +1,8 @@
+- Nextjs
+- TailWinds CSS, material TailWinds
+- Firebase
+= NextAuth
+
+Note:
+- md:style (min-width là md thì làm style, còn lại mobile first)
+- Inline flex chỉ chiếm đủ chỗ cho content // Flex chiếm toàn bộ space (có thể lớn hơn content)
