@@ -6,13 +6,13 @@ import Icon from "@material-tailwind/react/Icon"
 import Image from "next/image"
 import {getSession,useSession} from 'next-auth/client'
 
-// export async function getServerSideProps(context) {
-//   const session = await getSession(context);
+export async function getServerSideProps(context) {
+  const session = await getSession(context);
 
-//   return {
-//     props: {session}
-//   }
-// }
+  return {
+    props: {session}
+  }
+}
 
 export default function Home() {
   const [session] = useSession();
