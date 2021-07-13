@@ -9,6 +9,12 @@ import { useState } from 'react';
 import Modal from "@material-tailwind/react/Modal"
 import ModalBody from "@material-tailwind/react/ModalBody"
 import ModalFooter from "@material-tailwind/react/ModalFooter"
+import { db } from '../firebase';
+import firebase from 'firebase';
+import {
+  useCollectionOnce
+} from 'react-firebase-hooks/firestore'
+import DocumentRow from '../components/DocumentRow';
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
@@ -20,17 +26,26 @@ export async function getServerSideProps(context) {
 
 export default function Home() {
   const [session] = useSession();
-  const [showModal, setShowModal] = useState(false);
-  const [input, setInput] = useState("");
-
   if (!session) return <Login/>
 
-  const createDocument=() =>{
+  const [showModal, setShowModal] = useState(false);
+  const [input, setInput] = useState("");
+  const [snapshot] = useCollectionOnce(db.collection('userDocs').doc(session.user.email).collection('docs').orderBy('timestamp','desc'))
 
+  const createDocument=() =>{
+    if (!input) return;
+
+    db.collection('userDocs').doc(session.user.email).collection('docs').add({
+      fileName: input,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    setInput(input);
+    setShowModal(false)
   }
 
   const modal = (
-    <Modal size="sm" active={showModal} toggler={()=>{setShowModal(false)}}>
+    <Modal size="sm" active={showModal} toggler={()=>{setShowModal(false);}}>
       <ModalBody>
         <input
           value={input}
@@ -98,11 +113,19 @@ export default function Home() {
 
       <section className="bg-white px-10 md:px-0">
         <div className="max-w-3xl mx-auto py-8 text-sm text-gray-700">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-1">
             <h2 className="font-medium flex-grow">My Documents</h2>
             <p className="mr-12">Date created</p>
             <Icon name="folder" size="3xl" color="gray"/>
           </div>
+          {snapshot?.docs.map(doc => (
+          <DocumentRow 
+            key={doc.id}
+            id={doc.id}
+            fileName={doc.data().fileName}
+            date={doc.data().timestamp}
+          />
+          ))}
         </div>
       </section>
     </div>
