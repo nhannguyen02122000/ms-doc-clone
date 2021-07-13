@@ -15,6 +15,7 @@ import {
   useCollectionOnce
 } from 'react-firebase-hooks/firestore'
 import DocumentRow from '../components/DocumentRow';
+import { useRouter } from 'next/dist/client/router';
 
 export async function getServerSideProps(context) {
   const session = await getSession(context);
@@ -28,20 +29,22 @@ export default function Home() {
   const [session] = useSession();
   if (!session) return <Login/>
 
+  const router=useRouter();
   const [showModal, setShowModal] = useState(false);
   const [input, setInput] = useState("");
   const [snapshot] = useCollectionOnce(db.collection('userDocs').doc(session.user.email).collection('docs').orderBy('timestamp','desc'))
 
-  const createDocument=() =>{
+  const createDocument= async () =>{
     if (!input) return;
 
-    db.collection('userDocs').doc(session.user.email).collection('docs').add({
+    let docu = await db.collection('userDocs').doc(session.user.email).collection('docs').add({
       fileName: input,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     });
 
     setInput(input);
-    setShowModal(false)
+    setShowModal(false);
+    router.push(`/doc/${docu.id}`)
   }
 
   const modal = (
